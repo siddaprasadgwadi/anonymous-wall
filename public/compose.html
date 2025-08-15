@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anonymous Wall - Compose</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>💬 Anonymous Wall</h1></header>
+
+  <main>
+    <!-- Composer -->
+    <section class="card" id="composer">
+      <h2>Write a Post</h2>
+      <textarea id="postText" maxlength="500" placeholder="Share something... (max 500 chars)"></textarea>
+      <label class="inline">
+        <input type="checkbox" id="postAnonymous" checked /> Post anonymously
+      </label>
+      <button id="postBtn">Post</button>
+      <div id="postMsg"></div>
+    </section>
+  </main>
+
+  <footer>
+    <button id="logoutBtn" class="ghost hidden">Logout</button>
+  </footer>
+
+  <script>
+    const API_BASE = '';
+
+    const els = {
+      postText: document.getElementById('postText'),
+      postAnonymous: document.getElementById('postAnonymous'),
+      postBtn: document.getElementById('postBtn'),
+      postMsg: document.getElementById('postMsg'),
+      logoutBtn: document.getElementById('logoutBtn'),
+    };
+
+    function token() { return localStorage.getItem('jwt'); }
+    function setToken(t) { t ? localStorage.setItem('jwt', t) : localStorage.removeItem('jwt'); }
+
+    function setLoggedInUI(user) {
+      if (els.authStatus) {
+        els.authStatus.textContent = user ? `Logged in as ${user.username}` : '';
+      }
+      if (els.logoutBtn) {
+        els.logoutBtn.classList.toggle('hidden', !user);
+      }
+    }
+
+    async function me() {
+      const t = token();
+      if (!t) return null;
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { Authorization: `Bearer ${t}` }});
+        if (!res.ok) throw 0;
+        const data = await res.json();
+        return data.user;
+      } catch { return null; }
+    }
+
+    // ----- Posts
+    if (els.postBtn) {
+      els.postBtn.onclick = async () => {
+        try {
+          els.postMsg.textContent = 'Posting...';
+          const body = {
+            text: els.postText.value,
+            anonymous: els.postAnonymous.checked
+          };
+          const res = await fetch(`${API_BASE}/api/posts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Post failed');
+          els.postText.value = '';
+          els.postMsg.textContent = 'Posted!';
+          // Redirect to feed.html after posting
+          window.location.href = '/feed.html';
+        } catch (e) {
+          els.postMsg.textContent = e.message;
+        }
+      };
+    }
+
+    if (els.logoutBtn) {
+      els.logoutBtn.onclick = () => {
+        setToken(null);
+        setLoggedInUI(null);
+        // Redirect to account.html after logout
+        window.location.href = '/account.html';
+      };
+    }
+
+    // init
+    (async () => {
+      const user = await me();
+      setLoggedInUI(user);
+    })();
+  </script>
+</body>
+</html>

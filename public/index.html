@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anonymous Wall</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>💬 Anonymous Wall</h1></header>
+
+  <main>
+    <!-- Auth Section -->
+    <section class="card" id="authSection">
+      <h2>Account</h2>
+
+      <div class="tabs">
+        <button id="tabLogin" class="active">Login</button>
+        <button id="tabRegister">Register</button>
+      </div>
+
+      <div id="loginForm" class="panel">
+        <input id="loginId" placeholder="Email or Username" />
+        <input id="loginPassword" type="password" placeholder="Password" />
+        <button id="loginBtn">Login</button>
+      </div>
+
+      <div id="registerForm" class="panel hidden">
+        <input id="regUsername" placeholder="Username" />
+        <input id="regEmail" placeholder="Email" />
+        <input id="regPassword" type="password" placeholder="Password" />
+        <button id="registerBtn">Create account</button>
+      </div>
+
+      <div id="authStatus"></div>
+    </section>
+
+    <!-- Composer -->
+    <section class="card" id="composer" class="hidden">
+      <h2>Write a Post</h2>
+      <textarea id="postText" maxlength="500" placeholder="Share something... (max 500 chars)"></textarea>
+      <label class="inline">
+        <input type="checkbox" id="postAnonymous" checked /> Post anonymously
+      </label>
+      <button id="postBtn">Post</button>
+      <div id="postMsg"></div>
+    </section>
+
+    <!-- Views -->
+    <section class="card">
+      <div class="tabs">
+        <button id="tabFeed" class="active">Public Feed</button>
+        <button id="tabMine" class="">My Posts</button>
+      </div>
+
+      <div id="feed" class="panel"></div>
+      <div id="mine" class="panel hidden"></div>
+    </section>
+  </main>
+
+  <footer>
+    <button id="logoutBtn" class="ghost hidden">Logout</button>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

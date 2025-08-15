@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anonymous Wall - My Posts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>💬 Anonymous Wall</h1></header>
+
+  <main>
+    <!-- Views -->
+    <section class="card">
+      <div class="tabs">
+        <button id="tabFeed" class="">Public Feed</button>
+        <button id="tabMine" class="active">My Posts</button>
+      </div>
+
+      <div id="mine" class="panel"></div>
+      <!-- Public feed section will be loaded dynamically or in feed.html -->
+    </section>
+  </main>
+
+  <footer>
+    <button id="logoutBtn" class="ghost">Logout</button>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

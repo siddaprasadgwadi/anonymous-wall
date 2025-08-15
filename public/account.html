@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Anonymous Wall - Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header><h1>💬 Anonymous Wall</h1></header>
+
+  <main>
+    <!-- Auth Section -->
+    <section class="card" id="authSection">
+      <h2>Account</h2>
+
+      <div class="tabs">
+        <button id="tabLogin" class="active">Login</button>
+        <button id="tabRegister">Register</button>
+      </div>
+
+      <div id="loginForm" class="panel">
+        <input id="loginId" placeholder="Email or Username" />
+        <input id="loginPassword" type="password" placeholder="Password" />
+        <button id="loginBtn">Login</button>
+      </div>
+
+      <div id="registerForm" class="panel hidden">
+        <input id="regUsername" placeholder="Username" />
+        <input id="regEmail" placeholder="Email" />
+        <input id="regPassword" type="password" placeholder="Password" />
+        <button id="registerBtn">Create account</button>
+      </div>
+
+      <div id="authStatus"></div>
+    </section>
+  </main>
+
+  <footer>
+    <button id="logoutBtn" class="ghost hidden">Logout</button>
+  </footer>
+
+  <script>
+    const API_BASE = '';
+
+    const els = {
+      tabLogin: document.getElementById('tabLogin'),
+      tabRegister: document.getElementById('tabRegister'),
+      loginForm: document.getElementById('loginForm'),
+      registerForm: document.getElementById('registerForm'),
+      authStatus: document.getElementById('authStatus'),
+      logoutBtn: document.getElementById('logoutBtn'),
+
+      loginId: document.getElementById('loginId'),
+      loginPassword: document.getElementById('loginPassword'),
+      loginBtn: document.getElementById('loginBtn'),
+
+      regUsername: document.getElementById('regUsername'),
+      regEmail: document.getElementById('regEmail'),
+      regPassword: document.getElementById('regPassword'),
+      registerBtn: document.getElementById('registerBtn'),
+    };
+
+    function token() { return localStorage.getItem('jwt'); }
+    function setToken(t) { t ? localStorage.setItem('jwt', t) : localStorage.removeItem('jwt'); }
+
+    function setLoggedInUI(user) {
+      if (els.authStatus) {
+        els.authStatus.textContent = user ? `Logged in as ${user.username}` : '';
+      }
+      if (els.logoutBtn) {
+        els.logoutBtn.classList.toggle('hidden', !user);
+      }
+    }
+
+    async function me() {
+      const t = token();
+      if (!t) return null;
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/me`, { headers: { Authorization: `Bearer ${t}` }});
+        if (!res.ok) throw 0;
+        const data = await res.json();
+        return data.user;
+      } catch { return null; }
+    }
+
+    // ----- Tabs
+    if (els.tabLogin) {
+      els.tabLogin.onclick = () => {
+        els.tabLogin.classList.add('active'); els.tabRegister.classList.remove('active');
+        els.loginForm.classList.remove('hidden'); els.registerForm.classList.add('hidden');
+      };
+    }
+    if (els.tabRegister) {
+      els.tabRegister.onclick = () => {
+        els.tabRegister.classList.add('active'); els.tabLogin.classList.remove('active');
+        els.registerForm.classList.remove('hidden'); els.loginForm.classList.add('hidden');
+      };
+    }
+
+    // ----- Auth
+    if (els.registerBtn) {
+      els.registerBtn.onclick = async () => {
+        try {
+          const body = {
+            username: els.regUsername.value.trim(),
+            email: els.regEmail.value.trim(),
+            password: els.regPassword.value
+          };
+          const res = await fetch(`${API_BASE}/api/auth/register`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Register failed');
+          setToken(data.token);
+          const user = await me();
+          setLoggedInUI(user);
+          els.authStatus.textContent = 'Account created!';
+          // Redirect to feed.html after successful registration
+          window.location.href = '/feed.html';
+        } catch (e) {
+          els.authStatus.textContent = e.message;
+        }
+      };
+    }
+
+    if (els.loginBtn) {
+      els.loginBtn.onclick = async () => {
+        try {
+          const body = { emailOrUsername: els.loginId.value.trim(), password: els.loginPassword.value };
+          const res = await fetch(`${API_BASE}/api/auth/login`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Login failed');
+          setToken(data.token);
+          const user = await me();
+          setLoggedInUI(user);
+          els.authStatus.textContent = 'Welcome back!';
+          // Redirect to feed.html after successful login
+          window.location.href = '/feed.html';
+        } catch (e) {
+          els.authStatus.textContent = e.message;
+        }
+      };
+    }
+
+    if (els.logoutBtn) {
+      els.logoutBtn.onclick = () => {
+        setToken(null);
+        setLoggedInUI(null);
+        // Redirect to account.html after logout
+        window.location.href = '/account.html';
+      };
+    }
+
+    // init
+    (async () => {
+      const user = await me();
+      setLoggedInUI(user);
+    })();
+  </script>
+</body>
+</html>
